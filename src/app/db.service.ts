@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
-import { Subject } from 'rxjs';
 import { Grape } from './grape';
 
 @Injectable({
@@ -9,9 +8,18 @@ import { Grape } from './grape';
 export class DbService {
 
   $templateObjRef = this.db.object('/template');
-  $teacherObjRef = this.db.object('/template');
   private _grape;
   private _editor;
+  options = {
+    student: {
+      container: '#gjs',
+      plugins: ['gjs-blocks-basic']
+    },
+    teacher: {
+      container: '#gjs',
+      plugins: []
+    }
+  }
 
 
   constructor(public db: AngularFireDatabase) {
@@ -19,77 +27,60 @@ export class DbService {
   }
 
   init(option) {
-    console.log('option', option)
-    this._grape = new Grape(option);
-    this._editor = this._grape.getEditor();
+    this._grape = new Grape(this.options[option]);
+    this._editor = this._grape.getEditor();    
+    if (option === "teacher") {
+      this.removeInputPanels();
+    } else {
+      this.$templateObjRef.remove();
+    }
     this.createStorage(option);
     this._editor.load();
-    // if (option === "teacher") {
-    //   console.log('in')
-    //   this.dbListener()
-    // }
   }
 
-  // dbListener() {
-  //   //on each in db...load the db and update the html view
-  //   try {
-  //     this.$teacherObjRef.valueChanges().subscribe(data => {
-  //       debugger;
-  //       this._editor.load([data])
-  //     })
-  //   } catch (error) {
-  //     console.log('dblistener', error);
-  //   }
 
-  // }
+  removeInputPanels() {
+    const panels = this._editor.Panels;
+    const p = panels.getPanels().models;
+    p.forEach(model => {
+      if (model.id === "views" || model.id === "views-container") {
+        console.log(model);
+        panels.removePanel(model);
+      }
+    })
+  }
 
+  /**
+   * Load the data
+   * @param  {Array} keys Array containing values to load, eg, ['gjs-components', 'gjs-style', ...]
+   * @param  {Function} clb Callback function to call when the load is ended
+   * @param  {Function} clbErr Callback function to call in case of errors
+   */
+  /**
+   * Store the data
+   * @param  {Object} data Data object to store
+   * @param  {Function} clb Callback function to call when the load is ended
+   * @param  {Function} clbErr Callback function to call in case of errors
+   */
   createStorage(option) {
     const storage = this.$templateObjRef;
 
     this._editor.StorageManager.add('local', {
-      /**
-       * Load the data
-       * @param  {Array} keys Array containing values to load, eg, ['gjs-components', 'gjs-style', ...]
-       * @param  {Function} clb Callback function to call when the load is ended
-       * @param  {Function} clbErr Callback function to call in case of errors
-       */
+
       load(keys, clb, clbErr) {
-        console.log('keys');
         if (option !== "teacher") {
           console.log('loading...')
-          storage.query.once('value').then(data => {
-            console.log(data.val());
-            clb(data.val());
-          }).catch((error) => {
-            clbErr(error);
-          })
+          storage.query.once('value').then(data => clb(data.val())).catch((error) => clbErr(error))
         } else {
           try {
-            storage.valueChanges().subscribe(data => {
-              console.log(data);
-              clb(data);
-            })
+            storage.valueChanges().subscribe(data => clb(data))
           } catch (error) {
-
+            clbErr(error)
           }
         }
-        // keys.forEach(key => {
-        //   const value = storage[key];
-        //   if (value) {
-        //     result[key] = value;
-        //   }
-
-        // });
-        // Might be called inside some async method
-
       },
 
-      /**
-       * Store the data
-       * @param  {Object} data Data object to store
-       * @param  {Function} clb Callback function to call when the load is ended
-       * @param  {Function} clbErr Callback function to call in case of errors
-       */
+
       store(data, clb, clbErr) {
         if (option !== "teacher") {
           storage.update(data).then(data => {
@@ -135,9 +126,6 @@ export class DbService {
   //     }
   //   }
   // }
-
-
-
 
 
 }
