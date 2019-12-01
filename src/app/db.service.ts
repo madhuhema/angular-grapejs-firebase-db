@@ -9,22 +9,41 @@ import { Grape } from './grape';
 export class DbService {
 
   $templateObjRef = this.db.object('/template');
-  $template = new Subject();
+  $teacherObjRef = this.db.object('/template');
   private _grape;
   private _editor;
+
+
   constructor(public db: AngularFireDatabase) {
 
   }
 
   init(option) {
+    console.log('option', option)
     this._grape = new Grape(option);
     this._editor = this._grape.getEditor();
-    // this.createOnEvents('student');
-    this.createStorage();
+    this.createStorage(option);
     this._editor.load();
+    // if (option === "teacher") {
+    //   console.log('in')
+    //   this.dbListener()
+    // }
   }
 
-  createStorage() {
+  // dbListener() {
+  //   //on each in db...load the db and update the html view
+  //   try {
+  //     this.$teacherObjRef.valueChanges().subscribe(data => {
+  //       debugger;
+  //       this._editor.load([data])
+  //     })
+  //   } catch (error) {
+  //     console.log('dblistener', error);
+  //   }
+
+  // }
+
+  createStorage(option) {
     const storage = this.$templateObjRef;
 
     this._editor.StorageManager.add('local', {
@@ -35,15 +54,25 @@ export class DbService {
        * @param  {Function} clbErr Callback function to call in case of errors
        */
       load(keys, clb, clbErr) {
-        const result = {};
-        console.log('loading...')
-        storage.query.once('value').then(data => {
-          console.log(data.val());
-          clb(data.val());
-        }).catch((error) => {
-          clbErr(error);
-        })
+        console.log('keys');
+        if (option !== "teacher") {
+          console.log('loading...')
+          storage.query.once('value').then(data => {
+            console.log(data.val());
+            clb(data.val());
+          }).catch((error) => {
+            clbErr(error);
+          })
+        } else {
+          try {
+            storage.valueChanges().subscribe(data => {
+              console.log(data);
+              clb(data);
+            })
+          } catch (error) {
 
+          }
+        }
         // keys.forEach(key => {
         //   const value = storage[key];
         //   if (value) {
@@ -62,13 +91,18 @@ export class DbService {
        * @param  {Function} clbErr Callback function to call in case of errors
        */
       store(data, clb, clbErr) {
-        storage.update(data).then(data => {
-          console.log('stored', data);
+        if (option !== "teacher") {
+          storage.update(data).then(data => {
+            console.log('stored', data);
+            clb();
+          }).catch(err => {
+            console.log('err storing', err);
+            clbErr(err);
+          })
+        } else {
           clb();
-        }).catch(err => {
-          console.log('err storing', err);
-          clbErr(err);
-        })
+        }
+
       }
     });
   }

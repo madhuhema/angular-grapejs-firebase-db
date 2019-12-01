@@ -6,7 +6,8 @@ import { AppComponent } from './app.component';
 import { environment } from 'src/environments/environment';
 import { AngularFireModule } from '@angular/fire';
 import { AngularFireDatabaseModule } from '@angular/fire/database';
-import { DbService } from './db.service';
+import { TeacherModule } from './teacher/teacher.module';
+import { StudentModule } from './student/student.module';
 
 
 @NgModule({
@@ -17,9 +18,11 @@ import { DbService } from './db.service';
     BrowserModule,
     AppRoutingModule,
     AngularFireModule.initializeApp(environment.firebase),
-    AngularFireDatabaseModule
+    AngularFireDatabaseModule,
+    StudentModule,
+    TeacherModule
   ],
-  providers: [DbService],
+  providers: [],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

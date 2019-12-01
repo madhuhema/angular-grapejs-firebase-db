@@ -6,14 +6,6 @@ import { DbService } from './db.service';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent implements AfterViewInit {
+export class AppComponent {
   
-  db;
-  ngAfterViewInit(): void {
-    this.db.init('student')
-  }
-
-  constructor(_db: DbService) {
-    this.db = _db;
-  }
 }

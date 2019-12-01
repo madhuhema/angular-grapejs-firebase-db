@@ -2,12 +2,13 @@ import grapejs from 'grapesjs';
 import 'grapesjs-blocks-basic';
 
 export interface GrapeInterface {
-    getEditor() : void
+    getEditor(): void
 }
 export class Grape implements GrapeInterface {
+
     private _editor: any;
     private _grape: any;
-    
+
     options = {
         student: {
             container: '#gjs',
@@ -21,9 +22,6 @@ export class Grape implements GrapeInterface {
         teacher: {
             container: '#gjs',
             plugins: [],
-            storageManager: {
-                type: 'simple-storage'
-            }
             // pluginsOpts: {
             //   'gjs-blocks-basic': {
 
@@ -43,6 +41,21 @@ export class Grape implements GrapeInterface {
     constructor(option) {
         this._grape = grapejs;
         this._editor = this.initializeEditor(option);
+        if (option == "teacher") {
+            this.removeUnneccessaryPanels();
+        }
+    }
+
+    removeUnneccessaryPanels() {
+        const panels = this._editor.Panels;
+        const p = panels.getPanels().models;
+        const pl = panels.getPanelsEl();
+        p.forEach(model => {
+            if (model.id === "views" || model.id === "views-container") {
+                console.log(model);
+                panels.removePanel(model);
+            }
+        })
     }
 
     private initializeEditor(option): any {
