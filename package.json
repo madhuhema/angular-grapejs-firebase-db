@@ -23,7 +23,7 @@
     "firebase": "^7.5.0",
     "grapesjs": "^0.15.8",
     "grapesjs-blocks-basic": "^0.1.8",
-    "jquery": "^3.4.1",
+    "jquery": "^3.5.0",
     "rxjs": "~6.4.0",
     "tslib": "^1.10.0",
     "zone.js": "~0.9.1"
